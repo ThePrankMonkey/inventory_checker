@@ -64,7 +64,7 @@ class Inventory():
     def beat_price(self, price):
         return [x for x in self.stores if x.price <= price and x.availability != "Out of Stock"]
     def beat_discount(self, discount):
-        return [x for x in self.stores if x.price <= self.msrp*(1-discount) and x.availability != "Out of Stock"]
+        return [x for x in self.stores if x.price <= self.msrp*(1-discount/100) and x.availability != "Out of Stock"]
 
 
 # Functions
@@ -80,11 +80,10 @@ def mail(subject, body):
     {body}"
 
     try:
-        server = smtplib.SMTP_SSL(EMAIL_SERVER_SSL, EMAIL_SERVER_PORT)
-        server.ehlo()
-        server.login(os.environ['EMAIL_USER'], os.environ['EMAIL_PASS'])
-        server.sendmail(sender, recipient, email_content)
-        server.close()
+        with smtplib.SMTP_SSL(EMAIL_SERVER_SSL, EMAIL_SERVER_PORT) as server:
+            server.ehlo()
+            server.login(os.environ['EMAIL_USER'], os.environ['EMAIL_PASS'])
+            server.sendmail(sender, recipient, email_content)
         print('Email sent!')
     except SMTPAuthenticationError as e:
         print(f"Bad password! -- {e}")
@@ -115,7 +114,7 @@ def main():
                 mail(subject, body)
                 exit(0)
             else:
-                print(f"No stores in area beat the price of ${price}")
+                print(f"No stores in area beat the price of ${price}, will check again.")
         if "discount" in OPTION:
             discount = int(OPTION.split(":")[1])
             stores = inventory.beat_discount(discount)
@@ -123,11 +122,11 @@ def main():
                 print(f"The following stores beat the discount of {stores[0].price}%.")
                 print(inventory.stores)
                 subject = f"Sale on {inventory.name}, ${stores[0].price}"
-                body = f"The following stores beat the price of ${price} on {inventory.name}:\n\n{stores}"
+                body = f"The following stores beat the discount of {discount}% on {inventory.name}:\n\n{stores}"
                 mail(subject, body)
                 exit(0)
             else:
-                print(f"No stores in area beat the discount of {discount}%")
+                print(f"No stores in area beat the discount of {discount}%, will check again.")
         time.sleep(DELAY)
 
 if __name__ == "__main__":

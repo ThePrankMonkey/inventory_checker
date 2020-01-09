@@ -36,7 +36,7 @@ python3 inventory_checker.py $SKU $ZIPCODE price:$PRICE
 To continuously scan for a discount to be beaten, and send an email once is found:
 
 ```bash
-# DISCOUNT is between 0 and 1
+# DISCOUNT is between 0 and 100
 python3 inventory_checker.py $SKU $ZIPCODE price:$DISCOUNT
 ```
 
